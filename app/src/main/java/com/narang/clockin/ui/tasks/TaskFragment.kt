@@ -83,11 +83,10 @@ class TaskFragment : Fragment() {
     }
 
     private fun showTaskMenu(task: Task) {
-        val context = requireContext()
         val options = TaskMenuOption.entries.toTypedArray()
-        MaterialAlertDialogBuilder(context)
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(task.title)
-            .setItems(options.map { context.getString(it.actionTextId) }.toTypedArray()) { _, index ->
+            .setItems(options.map { requireContext().getString(it.actionTextId) }.toTypedArray()) { _, index ->
                 when (options[index]) {
                     TaskMenuOption.EDIT_TASK -> editTask(task)
                     TaskMenuOption.DELETE_TASK -> viewModel.onDeleteTask(task)

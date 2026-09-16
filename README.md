@@ -14,6 +14,22 @@ Built with **classic Android Views + ViewBinding** and **Firebase** as the backe
 
 ---
 
+## 📸 Screenshots
+
+<div style="overflow-x:auto; padding:8px 2px;">
+  <table>
+    <tr>
+      <td align="center"><img src="screenshots/splash_screen.png" alt="Splash Screen" width="200"/><br/><sub>Splash</sub></td>
+      <td align="center"><img src="screenshots/login_screen.png" alt="Login Screen" width="200"/><br/><sub>Login</sub></td>
+      <td align="center"><img src="screenshots/signup_screen.png" alt="Signup Screen" width="200"/><br/><sub>Signup</sub></td>
+      <td align="center"><img src="screenshots/home_screen.png" alt="Home Screen" width="200"/><br/><sub>Home</sub></td>
+      <td align="center"><img src="screenshots/add_task.png" alt="Add Task" width="200"/><br/><sub>Add Task</sub></td>
+    </tr>
+  </table>
+</div>
+
+---
+
 ## ✨ Key Features
 
 ### 🔐 Authentication & Startup Flow

@@ -51,21 +51,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
 
+        setContentView(R.layout.activity_main)
         drawerLayout = findViewById(R.id.drawer_layout)
         toolbar = findViewById(R.id.toolbar)
         navView = findViewById(R.id.nav_view)
         appBarLayout = findViewById(R.id.appBarLayout)
 
         setSupportActionBar(toolbar)
-
         toolbar.setNavigationOnClickListener {
             if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.closeDrawer(GravityCompat.START)
-            } else {
-                drawerLayout.openDrawer(GravityCompat.START)
-            }
+            } else drawerLayout.openDrawer(GravityCompat.START)
         }
 
         navView.setNavigationItemSelectedListener { menuItem ->
@@ -73,8 +70,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_tasks -> {
                     val top = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_container)
                     if (top !is TaskFragment) {
-                        // Drawer items are top-level: replace without stacking Tasks<->About
-                        // Avoid stacking: if About is on back stack, pop it before navigating
                         if (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_container) is AboutFragment) {
                             supportFragmentManager.popBackStack()
                         }
@@ -86,7 +81,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_about -> {
                     val top = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_container)
                     if (top !is AboutFragment) {
-                        // Don't stack duplicate About
                         Navigator.navigate(supportFragmentManager, AboutDestination, addToBackStack = true)
                     }
                     drawerLayout.closeDrawer(GravityCompat.START)
@@ -98,9 +92,9 @@ class MainActivity : AppCompatActivity() {
 
         if (savedInstanceState == null) {
             Navigator.navigate(supportFragmentManager, SplashDestination, addToBackStack = false)
-            // Ensure splash commit is executed so update sees it as top
             supportFragmentManager.executePendingTransactions()
             updateToolbarAndDrawerState()
+
             lifecycleScope.launch {
                 delay(SPLASH_DURATION_MS)
 
@@ -110,14 +104,12 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     Navigator.navigateToRoot(supportFragmentManager, LoginDestination)
                 }
-                // navigateToRoot uses commit() (async). Execute pending so findFragmentById sees new top.
                 supportFragmentManager.executePendingTransactions()
                 updateToolbarAndDrawerState()
                 // Post one more frame for safety (commit animation)
                 appBarLayout.post { updateToolbarAndDrawerState() }
             }
         } else {
-            // Restored after config change — fragment already attached
             supportFragmentManager.executePendingTransactions()
             updateToolbarAndDrawerState()
         }
@@ -169,7 +161,9 @@ class MainActivity : AppCompatActivity() {
         FirebaseAuth.getInstance().removeAuthStateListener(authListener)
     }
 
-    /** Central state: toolbar visibility/title + drawer lock + checked item. */
+    /**
+     * Central state: toolbar visibility/title + drawer lock + checked item.
+     * */
     private fun updateToolbarAndDrawerState() {
         val top = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_container)
 
@@ -181,21 +175,19 @@ class MainActivity : AppCompatActivity() {
         }
 
         appBarLayout.visibility = View.VISIBLE
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
 
         when (top) {
             is TaskFragment -> {
-                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 toolbar.title = getString(R.string.title_tasks)
                 navView.setCheckedItem(R.id.nav_tasks)
             }
             is AboutFragment -> {
-                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
                 toolbar.title = getString(R.string.title_about)
                 navView.setCheckedItem(R.id.nav_about)
             }
             else -> {
-                // Fallback: treat as top-level
-                drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+                // Fallback
                 toolbar.title = getString(R.string.app_name)
             }
         }

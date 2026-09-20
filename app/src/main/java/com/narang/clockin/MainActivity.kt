@@ -57,8 +57,11 @@ class MainActivity : AppCompatActivity() {
         toolbar = findViewById(R.id.toolbar)
         navView = findViewById(R.id.nav_view)
         appBarLayout = findViewById(R.id.appBarLayout)
-
         setSupportActionBar(toolbar)
+
+        /**
+         * define behaviour for views in [activity_main]
+         */
         toolbar.setNavigationOnClickListener {
             if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                 drawerLayout.closeDrawer(GravityCompat.START)
@@ -90,28 +93,27 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        supportFragmentManager.addOnBackStackChangedListener { updateToolbarAndDrawerState() } // redundant
+        supportFragmentManager.registerFragmentLifecycleCallbacks(
+            object : androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
+                override fun onFragmentViewCreated(fm: androidx.fragment.app.FragmentManager, f: androidx.fragment.app.Fragment, v: View, savedInstanceState: Bundle?) {
+                    updateToolbarAndDrawerState()
+                }
+            }, false // no run for non-direct childs
+        )
+
         if (savedInstanceState == null) {
             Navigator.navigate(supportFragmentManager, SplashDestination, addToBackStack = false)
-            supportFragmentManager.executePendingTransactions()
-            updateToolbarAndDrawerState()
 
             lifecycleScope.launch {
                 delay(SPLASH_DURATION_MS)
-
                 val loggedIn = FirebaseAuth.getInstance().currentUser != null
                 if (loggedIn) {
                     Navigator.navigateToRoot(supportFragmentManager, TasksDestination)
                 } else {
                     Navigator.navigateToRoot(supportFragmentManager, LoginDestination)
                 }
-                supportFragmentManager.executePendingTransactions()
-                updateToolbarAndDrawerState()
-                // Post one more frame for safety (commit animation)
-                appBarLayout.post { updateToolbarAndDrawerState() }
             }
-        } else {
-            supportFragmentManager.executePendingTransactions()
-            updateToolbarAndDrawerState()
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(drawerLayout) { v, insets ->
@@ -120,31 +122,17 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // Back-stack changes cover addToBackStack=true navigations (About)
-        supportFragmentManager.addOnBackStackChangedListener { updateToolbarAndDrawerState() }
-        // For addToBackStack=false replaces (Splash, Tasks root) the callback above doesn't fire,
-        // so also listen to any fragment attach/replace.
-        supportFragmentManager.registerFragmentLifecycleCallbacks(
-            object : androidx.fragment.app.FragmentManager.FragmentLifecycleCallbacks() {
-                override fun onFragmentViewCreated(fm: androidx.fragment.app.FragmentManager, f: androidx.fragment.app.Fragment, v: View, savedInstanceState: Bundle?) {
-                    updateToolbarAndDrawerState()
-                }
-            }, false
-        )
-
+        /**
+         * intercept the [onBackPressed] to handle Drawer case
+         */
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 when {
                     drawerLayout.isDrawerOpen(GravityCompat.START) -> drawerLayout.closeDrawer(GravityCompat.START)
                     else -> {
-                        // Let FragmentManager handle back stack; if empty, finish activity
-                        if (supportFragmentManager.backStackEntryCount > 0) {
-                            supportFragmentManager.popBackStack()
-                        } else {
-                            isEnabled = false
-                            onBackPressedDispatcher.onBackPressed()
-                            isEnabled = true
-                        }
+                        isEnabled = false
+                        onBackPressedDispatcher.onBackPressed()
+                        isEnabled = true
                     }
                 }
             }
@@ -162,7 +150,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Central state: toolbar visibility/title + drawer lock + checked item.
+     * toolbar visibility/title + drawer lock + checked item.
      * */
     private fun updateToolbarAndDrawerState() {
         val top = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_container)
@@ -186,10 +174,7 @@ class MainActivity : AppCompatActivity() {
                 toolbar.title = getString(R.string.title_about)
                 navView.setCheckedItem(R.id.nav_about)
             }
-            else -> {
-                // Fallback
-                toolbar.title = getString(R.string.app_name)
-            }
+            else -> toolbar.title = getString(R.string.app_name)
         }
     }
 

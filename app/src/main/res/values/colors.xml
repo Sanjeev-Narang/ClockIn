@@ -11,6 +11,7 @@
     <color name="checkbox_tint">#9CA3AF</color>
     <color name="fab_background">#111318</color>
     <color name="empty_state_icon">#D6D9DE</color>
+    <color name="drawer_checked_bg">#E8F0FE</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="purple_200">#FFBB86FC</color>

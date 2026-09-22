@@ -8,7 +8,7 @@
             android:checked="true" />
         <item
             android:id="@+id/nav_about"
-            android:icon="@drawable/ic_history_baseline"
+            android:icon="@drawable/ic_info"
             android:title="@string/title_about" />
     </group>
 </menu>

@@ -1,7 +1,7 @@
 package com.narang.clockin.ui.auth
 
 /**
- * Represents the UI state for the Authentication screens (Login/Signup).
+ * UI states for the Authentication screens (Login/Signup).
  */
 data class AuthUiState(
     val isLoading: Boolean = false,

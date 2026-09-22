@@ -48,6 +48,13 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:menu="@menu/menu_drawer" />
+        android:background="@color/card_background"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/menu_drawer"
+        app:itemBackground="@drawable/drawer_item_background"
+        app:itemTextColor="@color/text_primary"
+        app:itemIconTint="@color/text_primary"
+        app:itemIconSize="24dp"
+        app:itemIconPadding="12dp" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

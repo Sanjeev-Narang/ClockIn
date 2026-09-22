@@ -62,9 +62,7 @@ class SignupFragment : Fragment() {
                     if (state.isSuccess) {
                         Navigator.navigate(parentFragmentManager, TasksDestination, addToBackStack = false)
                     }
-
                     state.errorMessage?.let { error ->
-                        // You could show a Toast or an error dialog here
                         binding.inputLayoutSignupEmail.error = error
                     }
                 }

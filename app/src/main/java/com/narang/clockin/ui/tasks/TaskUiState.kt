@@ -1,6 +1,6 @@
 package com.narang.clockin.ui.tasks
 
-import com.narang.clockin.data.model.Task
+import com.narang.clockin.domain.Task
 
 data class TaskUiState(
     val isLoading: Boolean = true,

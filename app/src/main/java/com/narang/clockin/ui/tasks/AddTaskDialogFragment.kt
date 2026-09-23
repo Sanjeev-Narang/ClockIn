@@ -10,10 +10,13 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import com.narang.clockin.data.model.Priority
-import com.narang.clockin.data.model.Task
 import com.narang.clockin.databinding.DialogAddTaskBinding
+import com.narang.clockin.domain.Priority
+import com.narang.clockin.domain.Task
+import com.narang.clockin.ui.viewmodel.TaskViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AddTaskDialogFragment : DialogFragment() {
 
     private var _binding: DialogAddTaskBinding? = null
@@ -118,9 +121,7 @@ class AddTaskDialogFragment : DialogFragment() {
                     val newTask = Task(
                         title = title,
                         tag = tag,
-                        priority = if (isHighPriority) Priority.HIGH.name else Priority.NORMAL.name,
-                        dueDateTime = System.currentTimeMillis(), // Default to now
-                        dueDateLabel = "Today"
+                        priority = if (isHighPriority) Priority.HIGH.name else Priority.NORMAL.name
                     )
                     viewModel.addNewTask(newTask)
                 }

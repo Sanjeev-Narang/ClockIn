@@ -12,24 +12,22 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.firebase.auth.FirebaseAuth
 import com.narang.clockin.R
-import com.narang.clockin.data.model.Task
-import com.narang.clockin.data.repository.FirestoreTaskRepository
 import com.narang.clockin.databinding.FragmentTasksBinding
+import com.narang.clockin.domain.Task
 import com.narang.clockin.ui.adapter.TasksAdapter
 import com.narang.clockin.ui.adapter.buildTaskListItems
+import com.narang.clockin.ui.viewmodel.TaskViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class TaskFragment : Fragment() {
 
     private var _binding: FragmentTasksBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: TaskViewModel by viewModels {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-        TaskViewModelFactory(FirestoreTaskRepository(), userId)
-    }
+    private val viewModel: TaskViewModel by viewModels()
 
     private lateinit var adapter: TasksAdapter
 

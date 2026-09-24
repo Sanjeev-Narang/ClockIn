@@ -10,10 +10,13 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import com.narang.clockin.data.model.Priority
-import com.narang.clockin.data.model.Task
 import com.narang.clockin.databinding.DialogAddTaskBinding
+import com.narang.clockin.domain.Priority
+import com.narang.clockin.domain.Task
+import com.narang.clockin.ui.viewmodel.TaskViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AddTaskDialogFragment : DialogFragment() {
 
     private var _binding: DialogAddTaskBinding? = null
@@ -51,11 +54,6 @@ class AddTaskDialogFragment : DialogFragment() {
             binding.editTaskTitle.setText(task.title)
             // Prefill additional fields for a complete edit experience
             binding.switchPriority.isChecked = task.priority == Priority.HIGH.name
-            when (task.tag) {
-                "Work" -> binding.chipGroupTags.check(com.narang.clockin.R.id.chipWork)
-                "Personal" -> binding.chipGroupTags.check(com.narang.clockin.R.id.chipPersonal)
-                "Urgent" -> binding.chipGroupTags.check(com.narang.clockin.R.id.chipUrgent)
-            }
         } else {
             // You are in Add Mode.
             binding.dialogTitle.text = "Add Task"
@@ -94,22 +92,15 @@ class AddTaskDialogFragment : DialogFragment() {
     private fun setupClickListeners() {
         binding.btnSaveTask.setOnClickListener {
             val title = binding.editTaskTitle.text.toString().trim()
-            
-            val selectedChipId = binding.chipGroupTags.checkedChipId
-            val tag = if (selectedChipId != View.NO_ID) {
-                val chip = binding.chipGroupTags.findViewById<com.google.android.material.chip.Chip>(selectedChipId)
-                chip.text.toString()
-            } else ""
-            
+
             val isHighPriority = binding.switchPriority.isChecked
 
             if (title.isNotEmpty()) {
                 val currentEditingTask = editingTask
                 if (currentEditingTask != null) {
-                    // Edit Mode: update existing task
+                    // Edit Mode: update existing task (preserve tag — no tag UI)
                     val updatedTask = currentEditingTask.copy(
                         title = title,
-                        tag = tag,
                         priority = if (isHighPriority) Priority.HIGH.name else Priority.NORMAL.name
                     )
                     viewModel.updateTask(updatedTask)
@@ -117,10 +108,7 @@ class AddTaskDialogFragment : DialogFragment() {
                     // Add Mode: create new task
                     val newTask = Task(
                         title = title,
-                        tag = tag,
-                        priority = if (isHighPriority) Priority.HIGH.name else Priority.NORMAL.name,
-                        dueDateTime = System.currentTimeMillis(), // Default to now
-                        dueDateLabel = "Today"
+                        priority = if (isHighPriority) Priority.HIGH.name else Priority.NORMAL.name
                     )
                     viewModel.addNewTask(newTask)
                 }

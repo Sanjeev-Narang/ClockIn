@@ -1,64 +1,34 @@
-# Gradle files
+# build outputs & caches
 .gradle/
 build/
-
-# Local configuration file (sdk path, etc)
-local.properties
-
-# Log/OS Files
-*.log
-
-# Android Studio / IntelliJ
-*.iml
-.idea/
-
-# Kotlin compiler cache
 .kotlin/
-
-# Generated/transient files
 .artifacts/
-
-# opencode config (personal)
-opencode.jsonc
-AGENTS.md
-
-# macOS
-.DS_Store
-
-# Built application files (build outputs may be elsewhere)
-*.apk
-*.aar
-*.ap_
-*.aab
-
-# Files for the ART/Dalvik VM
-*.dex
-
-# Java class files
-*.class
-
-# Generated files
 bin/
 gen/
 out/
-
-# Gradle wrapper (keep gradlew, gradlew.bat, gradle/wrapper/)
-!gradle/wrapper/gradle-wrapper.jar
-
-# NDK
-.cxx/
-.externalNativeBuild/
-
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
-*.ipr
-*.iml
+*.apk
+*.aab
+*.aar
+*.ap_
+*.dex
+*.class
 *.hprof
 
-# CMake
-cmake-build-*/
+# local & personal config
+local.properties
+opencode.jsonc
+AGENTS.md
+
+# IDE
+.idea/
+*.iml
+
+# OS & logs
+.DS_Store
+*.log
+
+# firebase emulators (local-only)
+emulator-data/
+functions/node_modules/
+.firestore/
+.firebase/

@@ -13,7 +13,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.navigation.NavigationView
-import com.google.firebase.auth.FirebaseAuth
+import com.narang.clockin.domain.AuthRepository
 import com.narang.clockin.navigation.AboutDestination
 import com.narang.clockin.navigation.LoginDestination
 import com.narang.clockin.navigation.Navigator
@@ -24,29 +24,22 @@ import com.narang.clockin.ui.auth.LoginFragment
 import com.narang.clockin.ui.auth.SignupFragment
 import com.narang.clockin.ui.tasks.TaskFragment
 import com.narang.clockin.ui.splash.SplashFragment
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var authRepository: AuthRepository
 
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var toolbar: MaterialToolbar
     private lateinit var navView: NavigationView
     private lateinit var appBarLayout: View
-
-    private val authListener = FirebaseAuth.AuthStateListener { auth ->
-        if (auth.currentUser != null) return@AuthStateListener
-
-        val top = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_container)
-        val isOnAuthOrSplash = top is SplashFragment || top is LoginFragment || top is SignupFragment
-        if (isOnAuthOrSplash) {
-            Timber.d("Auth listener: already on auth/splash, no redirect")
-            return@AuthStateListener
-        }
-        Timber.d("Auth listener: user null while on $top -> redirect to Login")
-        Navigator.navigateToRoot(supportFragmentManager, LoginDestination)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -107,7 +100,7 @@ class MainActivity : AppCompatActivity() {
 
             lifecycleScope.launch {
                 delay(SPLASH_DURATION_MS)
-                val loggedIn = FirebaseAuth.getInstance().currentUser != null
+                val loggedIn = authRepository.getCurrentUser() != null
                 if (loggedIn) {
                     Navigator.navigateToRoot(supportFragmentManager, TasksDestination)
                 } else {
@@ -141,12 +134,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        FirebaseAuth.getInstance().addAuthStateListener(authListener)
-    }
+        if (authRepository.getCurrentUser() != null) return
 
-    override fun onStop() {
-        super.onStop()
-        FirebaseAuth.getInstance().removeAuthStateListener(authListener)
+        val top = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_container)
+        val isOnAuthOrSplash = top is SplashFragment || top is LoginFragment || top is SignupFragment
+        if (isOnAuthOrSplash) {
+            Timber.d("Auth check: already on auth/splash, no redirect")
+            return
+        }
+        Timber.d("Auth check: user null while on $top -> redirect to Login")
+        Navigator.navigateToRoot(supportFragmentManager, LoginDestination)
     }
 
     /**

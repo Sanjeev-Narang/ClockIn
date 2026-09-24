@@ -10,21 +10,20 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.narang.clockin.data.repository.FirebaseAuthRepository
+import com.narang.clockin.ui.viewmodel.AuthViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import com.narang.clockin.navigation.Navigator
 import com.narang.clockin.navigation.SignupDestination
 import com.narang.clockin.navigation.TasksDestination
 
+@AndroidEntryPoint
 class LoginFragment : Fragment() {
 
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: AuthViewModel by viewModels {
-        // We assume AuthViewModelFactory and AuthRepository are already made
-        AuthViewModelFactory(FirebaseAuthRepository())
-    }
+    private val viewModel: AuthViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

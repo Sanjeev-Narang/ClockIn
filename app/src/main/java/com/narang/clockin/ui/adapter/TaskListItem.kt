@@ -1,8 +1,8 @@
 package com.narang.clockin.ui.adapter
 
 import android.content.Context
-import com.narang.clockin.data.model.Section
-import com.narang.clockin.data.model.Task
+import com.narang.clockin.domain.Section
+import com.narang.clockin.domain.Task
 
 sealed class TaskListItem {
     data class Header(val title: String, val count: Int) : TaskListItem()

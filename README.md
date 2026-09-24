@@ -6,7 +6,7 @@
 
 **ClockIn** is a modern personal productivity Android application that helps users stay on top of their day with a focused, priority-driven task list.
 
-Built with **classic Android Views + ViewBinding** and **Firebase** as the backend, the app is designed to be **simple, scalable, and production-ready**.
+Built with **classic Android Views + ViewBinding** and a **local Firebase-emulator REST backend**, the app is designed to be **simple, scalable, and production-ready**.
 
 🎯 **Vision:**
 
@@ -42,15 +42,13 @@ Built with **classic Android Views + ViewBinding** and **Firebase** as the backe
 ### ✅ Task Management System
 
 - Create, edit, delete, and complete tasks
-- Due date + time with pre-formatted display label (e.g. "Today, 2:30 PM")
 - Tags (`Urgent` / `Work` / `Personal`) and priority (`HIGH` / `NORMAL`)
-- Checkbox toggle for completion with instant Firestore sync
+- Checkbox toggle for completion with instant sync
 - Empty-state, loading, and error (Snackbar) UI states
 
 ### 🎯 Priority-Based Task List
 
 - Tasks split into **High Priority** and **Upcoming** sections
-- Real-time Firestore query ordered by `dueDateTime`
 - In-memory filtering of completed tasks in the ViewModel
 - Sectioned `RecyclerView` with header + task rows via a single `TasksAdapter`
 
@@ -64,10 +62,10 @@ Built with **classic Android Views + ViewBinding** and **Firebase** as the backe
 
 ### ⚡ Data & Performance
 
-- Per-user Firestore subcollection: `users/{userId}/tasks/{taskId}`
-- Defensive, schema-less model (`Task.fromData` / `toMap`, `SCHEMA_VERSION = 1`)
-- Realtime updates via `callbackFlow` + `addSnapshotListener`
-- Coroutines + `kotlinx-coroutines-play-services` for all Firebase calls
+- REST API (Express backend in `functions/`, Firestore Admin on `users/{userId}/tasks/{taskId}`)
+- Plain dataclass model (`domain/Task` with defaults; Moshi ignores unknown fields)
+- Hilt DI with real REST-backed repositories (`RepositoryModule`)
+- Coroutines (`kotlinx-coroutines-android`) for all network calls
 - Timber logging (never `android.util.Log`)
 
 ---
@@ -88,9 +86,9 @@ Built with **classic Android Views + ViewBinding** and **Firebase** as the backe
 
 ### 🌐 Data Layer
 
-- Firebase Auth, Cloud Firestore, Analytics (`firebase-bom`)
-- Retrofit + Moshi + OkHttp (REST scaffolding via `TaskApi` / `TaskDto`)
-- Firestore schema enforced in-app (`Task.fromData` coerces `Number` / `Timestamp` / `Date` → millis, `"true"` / `"false"` → `Boolean`)
+- Retrofit + Moshi + OkHttp (`TaskApi` / `AuthApi`, DTOs with `toDomain()`)
+- Hilt DI (`NetworkModule`, `RepositoryModule`)
+- Plain `domain/Task` dataclass; backend normalizes dates to millis in `toTaskDto`
 
 ### 🔧 Tooling
 
@@ -106,19 +104,20 @@ Built with **classic Android Views + ViewBinding** and **Firebase** as the backe
 com.narang.clockin
 │
 ├── data/
-│   ├── model/
-│   │   └── Task.kt                  # Parcelable + fromData/toMap + SCHEMA_VERSION
-│   ├── repository/
-│   │   ├── TaskRepository.kt        # observe/add/update/delete/setCompleted
-│   │   ├── FirestoreTaskRepository.kt # users/{uid}/tasks, orderBy("dueDateTime")
-│   │   ├── AuthRepository.kt
-│   │   └── FirebaseAuthRepository.kt
-│   ├── TaskApi.kt / TaskDto.kt      # Retrofit REST scaffolding
+│   ├── TaskApi.kt / AuthApi.kt  # Retrofit contracts
+│   ├── TaskDto.kt / AuthDto.kt  # Moshi DTOs + toDomain()
+│   ├── TaskRepositoryImpl.kt    # REST impl
+│   ├── AuthRepositoryImpl.kt    # REST impl
 │   └── AuthInterceptor.kt
 │
 ├── domain/
-│   ├── Task.kt / TaskRepository.kt / Result.kt
-│   └── TaskRepositoryImp.kt
+│   ├── Task.kt                  # plain Parcelable dataclass with defaults
+│   ├── AuthUser.kt / Result.kt
+│   └── TaskRepository.kt / AuthRepository.kt
+│
+├── di/
+│   ├── NetworkModule.kt         # Moshi + OkHttp + Retrofit + APIs
+│   └── RepositoryModule.kt      # provides real impls
 │
 ├── navigation/
 │   ├── Destination.kt
@@ -131,11 +130,14 @@ com.narang.clockin
 │   ├── auth/
 │   │   ├── LoginFragment.kt
 │   │   ├── SignupFragment.kt
-│   │   ├── AuthViewModel.kt (+ Factory, UiState)
+│   │   ├── AuthUiState.kt
+│   ├── viewmodel/
+│   │   ├── AuthViewModel.kt (@HiltViewModel)
+│   │   └── TaskViewModel.kt (@HiltViewModel)
 │   ├── tasks/
 │   │   ├── TaskFragment.kt          # RecyclerView + FAB + menu dialog
 │   │   ├── AddTaskDialogFragment.kt # create/edit sheet
-│   │   ├── TaskViewModel.kt (+ Factory, UiState)
+│   │   ├── TaskUiState.kt
 │   ├── adapter/
 │   │   └── TaskAdapter.kt / TaskListItem.kt
 │   └── about/
@@ -153,9 +155,9 @@ UI (Fragments + ViewBinding)
         ↓
 ViewModel (StateFlow<TaskUiState> / AuthUiState)
         ↓
-Repository Layer (FirestoreTaskRepository / FirebaseAuthRepository)
+Repository Layer (TaskRepository / AuthRepository REST impls)
         ↓
-Remote Data Source (Firestore users/{uid}/tasks, FirebaseAuth)
+Remote Data Source (REST API: tasks + auth endpoints)
         ↓
 UI State Updates (render() + Snackbar / empty / loading states)
 ```
@@ -171,7 +173,7 @@ UI State Updates (render() + Snackbar / empty / loading states)
 ### 🔎 Auth Module
 
 - Login/signup with form validation and error states
-- Auth ViewModel backed by `FirebaseAuthRepository`
+- Auth ViewModel backed by `AuthRepository` (REST)
 - Automatic session restore on cold start
 
 ### ℹ️ About Module
@@ -196,17 +198,16 @@ cd ClockIn
 - Use JDK 21 (Gradle toolchain is managed)
 - Wait for Gradle sync (Gradle Wrapper 9.5.0, AGP 9.3.1)
 
-### 3. Add Firebase Config (required, gitignored)
+### 3. Start the local backend (Firebase emulators — no cloud project needed)
 
-This project uses Firebase Auth + Firestore. `google-services.json` and `local.properties` are gitignored and never committed.
+This project uses **only** the local Firebase emulators as its HTTP server. No Firebase console project, no `google-services.json`, no cloud billing — the app talks to the Functions emulator on your laptop's LAN IP (`NetworkModule.BASE_URL`).
 
-- Create a Firebase project
-- Add an Android app with ID `com.narang.clockin`
-- Download `google-services.json` into `app/`:
+- Install the Firebase CLI, then start Auth + Firestore + Functions with persisted seed data:
   ```
-  app/google-services.json
+  JAVA_TOOL_OPTIONS="-Xmx512m" firebase emulators:start --only auth,firestore,functions --import=./emulator-data --export-on-exit=./emulator-data
   ```
-- Enable **Authentication → Email/Password** and **Cloud Firestore** in the Firebase console
+- Demo login: `demo@clockin.app` / `demo1234` (seeded in `emulator-data/`, gitignored).
+- **If the laptop's IP changes** (e.g. phone hotspot instead of home Wi-Fi), update `NetworkModule.BASE_URL` and rebuild — hotspot subnets are usually `192.168.43.x` (Android) or `172.20.10.x` (iPhone).
 
 ### 4. Build & Run
 
@@ -217,7 +218,7 @@ This project uses Firebase Auth + Firestore. `google-services.json` and `local.p
 Useful commands:
 
 ```
-./gradlew testDebugUnitTest          # JVM unit tests (incl. Task.fromData/toMap)
+./gradlew testDebugUnitTest          # JVM unit tests (incl. TaskDto mapping)
 ./gradlew connectedDebugAndroidTest  # instrumented tests
 ./gradlew lint                       # Android lint
 ./gradlew check                      # full check
@@ -262,4 +263,4 @@ This project is for educational and portfolio purposes only.
 
 ## 🚀 Final Note
 
-ClockIn is a focused, Firebase-backed productivity app concept designed to grow into a full daily-planning product with reminders, offline-first sync, and smart prioritization.
+ClockIn is a focused, local-backend (Firebase emulators) productivity app concept designed to grow into a full daily-planning product with reminders, offline-first sync, and smart prioritization.

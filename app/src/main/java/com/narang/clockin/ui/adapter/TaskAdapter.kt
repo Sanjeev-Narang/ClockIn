@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.narang.clockin.databinding.ItemSectionHeaderBinding
 import com.narang.clockin.databinding.ItemTaskBinding
-import com.narang.clockin.data.model.Task
+import com.narang.clockin.domain.Task
 
 private const val VIEW_TYPE_HEADER = 0
 private const val VIEW_TYPE_TASK = 1
@@ -58,7 +58,6 @@ class TasksAdapter(
         fun bind(task: Task) {
             binding.checkboxTask.setOnCheckedChangeListener(null)
             binding.textTaskTitle.text = task.title
-            binding.textDueDate.text = task.dueDateLabel
             binding.checkboxTask.isChecked = task.isCompleted
 
             if (task.tag.isNotBlank()) {

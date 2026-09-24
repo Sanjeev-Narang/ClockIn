@@ -48,28 +48,11 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <ImageView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:src="@drawable/ic_calendar"
-                    android:contentDescription="@null"
-                    app:tint="@color/text_secondary" />
-
-                <TextView
-                    android:id="@+id/textDueDate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:textSize="13sp"
-                    android:textColor="@color/text_secondary"
-                    tools:text="Today, 2:30 PM" />
-
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipTag"
                     style="@style/Widget.Tasks.Chip"
                     android:layout_width="wrap_content"
                     android:layout_height="24dp"
-                    android:layout_marginStart="10dp"
                     tools:text="Urgent" />
             </LinearLayout>
         </LinearLayout>

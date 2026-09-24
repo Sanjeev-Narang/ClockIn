@@ -5,32 +5,12 @@ import com.narang.clockin.R
 import timber.log.Timber
 
 /**
- * Central navigation helper — owns all FragmentManager transactions.
- *
- * Design:
- * - Single container: [R.id.nav_host_fragment_container] hosted by
- *   `MainActivity`. All screens replace this id.
- * - [Destination.tag] is used as fragment tag and back-stack name so
- *   restores after configuration change can find fragments via tag.
- * - Uses `FragmentManager` directly (no Jetpack Navigation component).
- *
- * Modularity / future evolution:
- * - To add ViewModel argument passing, create `data class` destinations with
- *   typed props (e.g. `data class Detail(val taskId: String): Destination`) and
- *   have `newInstance()` put them into `arguments` via `bundleOf`.
- * - To support Activity destinations, introduce `sealed interface Destination`
- *   with `ActivityDestination` subtype and branch in [navigate] via `when`.
- * - To add animations/transitions, add optional params to [Destination] or
- *   to these methods.
- *
- * All methods are idempotent with respect to `AuthStateListener` — they can be
- * called on every `onStart` without duplicating transactions.
+ * central navigation helper and owns all FragmentManager transactions.
  */
 object Navigator {
 
     /**
-     * canonical navigate method. the primary method to replace fragments.
-     * uses manual fragment transaction
+     * canonical navigate method to replace fragments.
      */
     fun navigate(
         fragmentManager: FragmentManager,
@@ -57,9 +37,7 @@ object Navigator {
     ) = navigate(fragmentManager, destination, addToBackStack)
 
     /**
-     * Canonical root navigation — clears the entire back stack before replacing.
-     * Use for auth transitions (e.g. login success, logout) so the user cannot
-     * navigate back to the previous auth screen.
+     * Canonical root navigation to clear the entire back stack before replacing.
      */
     fun navigateToRoot(
         fragmentManager: FragmentManager,

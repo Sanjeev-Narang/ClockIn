@@ -17,14 +17,14 @@ data class SignupRequest(
 )
 
 @JsonClass(generateAdapter = true)
-data class AuthResponseDto(
-    @Json(name = "id") val id: String?,
-    @Json(name = "email") val email: String?,
-    @Json(name = "token") val token: String? = null
+data class AuthResponse(
+    @Json(name = "id") val id: String,
+    @Json(name = "email") val email: String,
+    @Json(name = "token") val token: String
 )
 
-fun AuthResponseDto.toDomain(fallbackEmail: String): AuthUser = AuthUser(
-    id = id ?: "",
-    email = email ?: fallbackEmail,
+fun AuthResponse.toDomain(): AuthUser = AuthUser(
+    id = id,
+    email = email,
     token = token
 )

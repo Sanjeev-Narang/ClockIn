@@ -22,7 +22,7 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun login(email: String, password: String): Result<AuthUser> {
         return try {
             Timber.d("Logging in via REST api")
-            val user = api.login(LoginRequest(email, password)).toDomain(email)
+            val user = api.login(LoginRequest(email, password)).toDomain()
             saveSession(user)
             Result.Success(user)
         } catch (e: IOException) {
@@ -44,7 +44,7 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun signup(email: String, password: String): Result<AuthUser> {
         return try {
             Timber.d("Signing up via REST api")
-            val user = api.signup(SignupRequest(email, password)).toDomain(email)
+            val user = api.signup(SignupRequest(email, password)).toDomain()
             saveSession(user)
             Result.Success(user)
         } catch (e: IOException) {
@@ -72,11 +72,8 @@ class AuthRepositoryImpl @Inject constructor(
     override fun getCurrentUser(): AuthUser? {
         val id = prefs.getString(KEY_USER_ID, null) ?: return null
         val email = prefs.getString(KEY_EMAIL, null) ?: return null
-        return AuthUser(
-            id = id,
-            email = email,
-            token = prefs.getString(KEY_TOKEN, null)
-        )
+        val token = prefs.getString(KEY_TOKEN, null) ?: return null
+        return AuthUser(id, email, token)
     }
 
     private fun saveSession(user: AuthUser) {

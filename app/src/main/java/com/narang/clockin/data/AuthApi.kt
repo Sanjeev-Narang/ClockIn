@@ -8,10 +8,10 @@ interface AuthApi {
     @POST("auth/login")
     suspend fun login(
         @Body request: LoginRequest
-    ): AuthResponseDto
+    ): AuthResponse
 
     @POST("auth/signup")
     suspend fun signup(
         @Body request: SignupRequest
-    ): AuthResponseDto
+    ): AuthResponse
 }
